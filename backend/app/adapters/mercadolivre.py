@@ -11,10 +11,13 @@
 
 from __future__ import annotations
 
+import asyncio
 import time
 
 import httpx
 
+from ..parsing.matcher import match
+from ..parsing.specs import Specs, extract_specs
 from ..schemas import Offer, SearchQuery
 from .base import StoreAdapter, StoreBlocked, StoreError, StoreNotConfigured
 from .registry import register
@@ -90,12 +93,55 @@ def ml_item_to_offer(item: dict) -> Offer | None:
     )
 
 
+def catalog_attributes_text(product: dict) -> str:
+    """Atributos úteis do produto de catálogo, como texto para o parser de specs."""
+    parts = []
+    for attr in product.get("attributes") or []:
+        if attr.get("id") in _SPEC_ATTRIBUTES and attr.get("value_name"):
+            parts.append(f"{_SPEC_ATTRIBUTES[attr['id']]} {attr['value_name']}".strip())
+    return " ".join(parts)
+
+
+def ml_catalog_to_offer(product: dict, items: list[dict]) -> Offer | None:
+    """Produto de catálogo + seus anúncios -> oferta com o anúncio novo mais barato."""
+    pid = product.get("id")
+    name = (product.get("name") or "").strip()
+    priced = [i for i in items if i.get("price") and i.get("condition", "new") == "new"] or [i for i in items if i.get("price")]
+    if not pid or not name or not priced:
+        return None
+    best = min(priced, key=lambda i: i["price"])
+    price = float(best["price"])
+    original = best.get("original_price")
+    shipping = best.get("shipping") or {}
+    pictures = product.get("pictures") or []
+    condition = {"used": "usado", "refurbished": "recondicionado"}.get(best.get("condition"), "novo")
+    if condition == "novo":
+        condition = detect_condition(name)
+    extra = catalog_attributes_text(product)
+    return Offer(
+        store="mercadolivre",
+        store_name="Mercado Livre",
+        external_id=str(pid),
+        title=name,
+        url=product.get("permalink") or f"https://www.mercadolivre.com.br/p/{pid}",
+        image_url=(pictures[0].get("url") or pictures[0].get("secure_url")) if pictures else None,
+        price_cash=price,
+        price_list=float(original) if original and original > price else None,
+        discount_pct=discount(original, price),
+        shipping=0.0 if shipping.get("free_shipping") else None,
+        seller=f"{len(priced)} {'vendedor' if len(priced) == 1 else 'vendedores'} no catálogo",
+        is_official=bool(best.get("official_store_id")),
+        condition=condition,
+        specs={"_extra_text": extra} if extra else {},
+    )
+
+
 @register
 class MercadoLivreAdapter(StoreAdapter):
     slug = "mercadolivre"
     name = "Mercado Livre"
     homepage = "https://www.mercadolivre.com.br"
-    strategy = "API oficial (OAuth client_credentials)"
+    strategy = "API oficial (OAuth client_credentials); usa o catálogo quando a busca de anúncios é recusada"
 
     _token: str | None = None
     _token_exp: float = 0.0
@@ -131,25 +177,40 @@ class MercadoLivreAdapter(StoreAdapter):
         type(self)._token_exp = time.time() + int(data.get("expires_in", 21600))
         return self._token  # type: ignore[return-value]
 
+    #: Desde 2025 a busca de anúncios dá 403 para a maioria dos apps; quando isso
+    #: acontece, passamos a usar só o catálogo (e lembramos disso até reiniciar).
+    _listing_search_blocked: bool = False
+    catalog_max_products: int = 12
+
+    async def _api_get(self, path: str, token: str, params: dict | None = None) -> httpx.Response:
+        try:
+            return await self._client.get(
+                f"{API}{path}", params=params,
+                headers={"Authorization": f"Bearer {token}", "Accept": "application/json"},
+            )
+        except httpx.HTTPError as exc:
+            raise StoreError("Não foi possível conectar ao Mercado Livre", detail=str(exc)) from exc
+
     async def search(self, query: SearchQuery) -> list[Offer]:
         if not self.is_configured():
             raise StoreNotConfigured(self.not_configured_message())
         token = await self._get_token()
+        if not self._listing_search_blocked:
+            try:
+                return await self._search_listings(query, token)
+            except StoreBlocked as exc:
+                self.log.warning("busca de anúncios recusada (%s); usando o catálogo", exc.detail)
+                type(self)._listing_search_blocked = True
+        return await self._search_catalog(query, token)
+
+    async def _search_listings(self, query: SearchQuery, token: str) -> list[Offer]:
+        """Busca normal de anúncios (/sites/MLB/search)."""
         offers: dict[str, Offer] = {}
         for term in query.store_terms[:2]:
-            try:
-                resp = await self._client.get(
-                    f"{API}/sites/MLB/search",
-                    params={"q": term, "limit": 50},
-                    headers={"Authorization": f"Bearer {token}", "Accept": "application/json"},
-                )
-            except httpx.HTTPError as exc:
-                raise StoreError("Não foi possível conectar ao Mercado Livre", detail=str(exc)) from exc
+            resp = await self._api_get("/sites/MLB/search", token, {"q": term, "limit": 50})
             if resp.status_code in (401, 403):
-                raise StoreBlocked(
-                    "A API de busca do Mercado Livre recusou o acesso",
-                    detail=f"HTTP {resp.status_code}: {resp.text[:200]}",
-                )
+                raise StoreBlocked("A API de busca do Mercado Livre recusou o acesso",
+                                   detail=f"HTTP {resp.status_code}: {resp.text[:200]}")
             if resp.status_code != 200:
                 raise StoreError("Mercado Livre respondeu com erro", detail=f"HTTP {resp.status_code}")
             results = resp.json().get("results") or []
@@ -159,3 +220,45 @@ class MercadoLivreAdapter(StoreAdapter):
                 if offer and offer.external_id not in offers:
                     offers[offer.external_id] = offer
         return list(offers.values())
+
+    async def _search_catalog(self, query: SearchQuery, token: str) -> list[Offer]:
+        """Busca no catálogo (/products/search) e preço dos anúncios de cada produto (/products/{id}/items).
+
+        Para economizar requisições, só buscamos preço dos produtos cujo nome já é
+        compatível com a busca (mesmo filtro usado no resto do app).
+        """
+        products: dict[str, dict] = {}
+        for term in query.store_terms[:2]:
+            resp = await self._api_get("/products/search", token, {"status": "active", "site_id": "MLB", "q": term, "limit": 50})
+            if resp.status_code in (401, 403):
+                raise StoreBlocked("O Mercado Livre recusou também a busca de catálogo",
+                                   detail=f"HTTP {resp.status_code}: {resp.text[:200]}")
+            if resp.status_code != 200:
+                raise StoreError("Mercado Livre respondeu com erro", detail=f"catálogo HTTP {resp.status_code}: {resp.text[:200]}")
+            results = resp.json().get("results") or []
+            self.log.info("catálogo '%s' -> %d produtos", term, len(results))
+            for p in results:
+                if p.get("id") and p["id"] not in products:
+                    products[p["id"]] = p
+
+        wanted = Specs(**{k: v for k, v in query.specs.items() if k in Specs.__dataclass_fields__})
+        candidates = []
+        for p in products.values():
+            text = f"{p.get('name', '')} {catalog_attributes_text(p)}"
+            if match(wanted, p.get("name", ""), extract_specs(text)).accepted:
+                candidates.append(p)
+        candidates = candidates[: self.catalog_max_products]
+        self.log.info("catálogo: %d produtos, %d compatíveis pelo nome", len(products), len(candidates))
+
+        sem = asyncio.Semaphore(4)
+
+        async def price_of(product: dict) -> Offer | None:
+            async with sem:
+                resp = await self._api_get(f"/products/{product['id']}/items", token, {"limit": 20})
+            if resp.status_code != 200:
+                self.log.info("sem preço para %s (HTTP %s)", product["id"], resp.status_code)
+                return None
+            return ml_catalog_to_offer(product, resp.json().get("results") or [])
+
+        found = await asyncio.gather(*(price_of(p) for p in candidates))
+        return [o for o in found if o]

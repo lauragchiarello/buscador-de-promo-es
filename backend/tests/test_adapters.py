@@ -143,17 +143,21 @@ async def test_ml_search_with_mock_api():
     assert {o.external_id for o in offers} == {r["id"] for r in data["results"]}
 
 
-async def test_ml_403_is_reported_as_blocked():
+async def test_ml_403_everywhere_is_reported_as_blocked():
+    # Busca de anúncios E catálogo recusados -> loja bloqueada (o modo catálogo é testado em test_ml_catalog.py)
     settings = Settings(ml_client_id="abc", ml_client_secret="xyz")
     MercadoLivreAdapter._token = None
+    MercadoLivreAdapter._listing_search_blocked = False
     http = HttpPolicy(settings, transport=_transport({
         "https://api.mercadolibre.com/oauth/token": httpx.Response(200, json={"access_token": "T", "expires_in": 21600}),
         "https://api.mercadolibre.com/sites/MLB/search": httpx.Response(403, json={"message": "forbidden"}),
+        "https://api.mercadolibre.com/products/search": httpx.Response(403, json={"message": "forbidden"}),
     }))
     with pytest.raises(StoreBlocked):
         await MercadoLivreAdapter(settings, http=http).search(QUERY)
     await http.aclose()
     MercadoLivreAdapter._token = None
+    MercadoLivreAdapter._listing_search_blocked = False
 
 
 # --- Fast Shop (VTEX) -----------------------------------------------------
