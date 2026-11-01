@@ -46,6 +46,14 @@ class Settings(BaseSettings):
     shopee_app_id: str = ""
     shopee_app_secret: str = ""
 
+    # Coletor de casa (lojas que bloqueiam acesso da nuvem)
+    # No SITE (Render): lojas que devem ir para a fila do coletor. Ex.: REMOTE_STORES=kabum
+    remote_stores: str = ""
+    collector_wait_seconds: float = 25.0
+    # No COLETOR (seu computador): lojas que ele atende e um nome para identificá-lo
+    collector_stores: str = "kabum"
+    collector_name: str = "computador-de-casa"
+
     # Lomadee — rede de afiliados (https://docs.lomadee.com.br)
     lomadee_api_key: str = ""
     lomadee_base_url: str = "https://api.lomadee.com.br"
@@ -54,6 +62,14 @@ class Settings(BaseSettings):
     @property
     def cors_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def remote_list(self) -> list[str]:
+        return [s.strip() for s in self.remote_stores.split(",") if s.strip()]
+
+    @property
+    def collector_list(self) -> list[str]:
+        return [s.strip() for s in self.collector_stores.split(",") if s.strip()]
 
     @property
     def enabled_list(self) -> list[str]:

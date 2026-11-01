@@ -6,6 +6,7 @@ import Tooltip from '../../ui/Tooltip/Tooltip.jsx';
 import { cx } from '../../../utils/classNames.js';
 
 function describe(info) {
+  const viaHome = info.via_collector ? ' · via PC de casa' : '';
   switch (info.status) {
     case 'loading':
       return { text: 'buscando…', tone: 'loading' };
@@ -13,7 +14,7 @@ function describe(info) {
       const n = info.offerCount ?? 0;
       const secs = info.elapsed_ms ? ` · ${(info.elapsed_ms / 1000).toFixed(1)}s` : '';
       return {
-        text: `${n} ${n === 1 ? 'oferta' : 'ofertas'}${info.cached ? ' · do cache' : secs}`,
+        text: `${n} ${n === 1 ? 'oferta' : 'ofertas'}${info.cached ? ' · do cache' : secs}${viaHome}`,
         tone: n ? 'ok' : 'empty',
         tip: info.total_found
           ? `${info.total_found} anúncios encontrados, ${info.excluded_count} descartados por não baterem com a busca.`
@@ -23,6 +24,13 @@ function describe(info) {
     case 'not_configured':
       return { text: 'precisa de chave', tone: 'muted', tip: info.message };
     default:
+      if (info.via_collector && /desligado/i.test(info.message || '')) {
+        return {
+          text: 'PC de casa desligado',
+          tone: 'muted',
+          tip: 'Esta loja bloqueia acessos da nuvem e é buscada pelo coletor no seu computador. Ligue o coletor para ver as ofertas dela.',
+        };
+      }
       return { text: 'indisponível no momento', tone: 'error', tip: info.message };
   }
 }

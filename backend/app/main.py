@@ -13,23 +13,12 @@ from .adapters.registry import build_adapters
 from .api.routes import router
 from .config import BASE_DIR, get_settings
 from .logging_setup import setup_logging
+from .migrations import run_migrations
 from .services.orchestrator import SearchOrchestrator
 
 settings = get_settings()
 setup_logging(settings.log_level)
 log = logging.getLogger("app")
-
-
-def run_migrations() -> None:
-    """Aplica as migrações do Alembic ao subir (cria o banco SQLite na primeira vez)."""
-    from alembic import command
-    from alembic.config import Config
-
-    cfg = Config(str(BASE_DIR / "alembic.ini"))
-    cfg.attributes["skip_logging"] = True  # mantém nosso formato de log
-    cfg.set_main_option("script_location", str(BASE_DIR / "alembic"))
-    cfg.set_main_option("sqlalchemy.url", settings.database_url.replace("%", "%%"))  # configparser usa "%"
-    command.upgrade(cfg, "head")
 
 
 @asynccontextmanager

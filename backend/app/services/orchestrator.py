@@ -113,7 +113,8 @@ class SearchOrchestrator:
 
     async def _fetch_store(self, adapter: StoreAdapter, query: SearchQuery, specs: Specs, f: SearchFilters) -> dict:
         started = time.perf_counter()
-        base = {"type": "store_result", "store": adapter.slug, "name": adapter.name}
+        base = {"type": "store_result", "store": adapter.slug, "name": adapter.name,
+                "via_collector": getattr(adapter, "via_collector", False)}
 
         if not adapter.is_configured():
             return {**base, "status": "not_configured", "message": adapter.not_configured_message(), "offers": []}

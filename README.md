@@ -112,6 +112,28 @@ O projeto é para uso pessoal, em volume baixo e com cache.
 
 ---
 
+## Site na nuvem + coletor de casa (KaBuM! no Render)
+
+O KaBuM! bloqueia acessos vindos de servidores de nuvem. Para ele aparecer no site do
+Render, um **coletor** roda no seu computador e faz essas buscas pela internet de casa:
+
+```
+site (Render) ── grava pedido ──▶ banco (Supabase) ◀── lê pedido / grava resultado ── coletor (seu PC)
+```
+
+- O resultado chega na mesma busca, alguns segundos depois das outras lojas ("via PC de casa").
+- Com o coletor desligado, o site funciona normalmente e mostra "PC de casa desligado" para essas lojas.
+- O coletor não abre nenhuma porta no seu computador; ele só conversa com o banco.
+
+**Configuração (uma vez):**
+1. O site e o coletor precisam usar o **mesmo banco**: coloque a mesma `DATABASE_URL` (Supabase) no Render e no `.env`.
+2. No **Render → Environment**: `REMOTE_STORES` = `kabum`.
+3. No seu computador, ligue o coletor com **uma** destas opções:
+   - dê dois cliques em `coletor.bat` (Windows) e deixe a janela aberta; ou
+   - rode `docker compose --profile coletor up -d coletor`. Ele reinicia sozinho com o Docker. No Supabase, use a string do Session pooler, porque o Docker não tem IPv6.
+
+---
+
 ## Deploy no Render
 
 Um único Web Service (runtime **Python 3**) entrega a API e as telas do React.

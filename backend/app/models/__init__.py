@@ -123,3 +123,31 @@ class CatalogItem(Base):
     external_id: Mapped[str] = mapped_column(String(120))
     payload: Mapped[dict] = mapped_column(JSON)
     refreshed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class RemoteJob(Base):
+    """Pedido de busca para o coletor de casa (lojas que bloqueiam acesso da nuvem)."""
+
+    __tablename__ = "remote_jobs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    store: Mapped[str] = mapped_column(String(40), index=True)
+    query_key: Mapped[str] = mapped_column(String(64), index=True)
+    raw_query: Mapped[str] = mapped_column(String(300))
+    request: Mapped[dict] = mapped_column(JSON)  # SearchQuery serializado
+    status: Mapped[str] = mapped_column(String(16), default="pending", index=True)  # pending|working|done|error
+    result: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    claimed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class CollectorHeartbeat(Base):
+    """Último sinal de vida de cada coletor de casa."""
+
+    __tablename__ = "collector_heartbeats"
+
+    name: Mapped[str] = mapped_column(String(80), primary_key=True)
+    stores: Mapped[list] = mapped_column(JSON, default=list)
+    last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

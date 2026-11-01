@@ -46,6 +46,18 @@ services:
     depends_on:
       - backend
 
+  # Coletor de casa: busca as lojas que bloqueiam a nuvem e devolve pelo banco do site.
+  # Usa o DATABASE_URL do .env (o mesmo do Render; no Supabase, a string do "Session pooler",
+  # porque o Docker não tem IPv6). Suba com: docker compose --profile coletor up -d coletor
+  coletor:
+    build: ./backend
+    command: python -m app.collector
+    profiles: ["coletor"]
+    env_file:
+      - path: .env
+        required: true
+    restart: unless-stopped
+
 volumes:
   pgdata:
   frontend_node_modules:
