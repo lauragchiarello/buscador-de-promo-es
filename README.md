@@ -111,6 +111,28 @@ O projeto é para uso pessoal, em volume baixo e com cache.
 
 ---
 
+## Deploy no Render
+
+Um único Web Service (runtime **Python 3**) entrega a API e as telas do React.
+
+| Configuração (Settings) | Valor |
+|---|---|
+| Branch | `main` |
+| Root Directory | *(vazio)* |
+| Build Command | `bash render-build.sh` |
+| Start Command | `bash render-start.sh` |
+| Health Check Path | `/api/health` |
+
+Variáveis de ambiente (Environment), todas opcionais:
+
+- `PYTHON_VERSION` = `3.12.8`
+- `DATABASE_URL`: string do "Session pooler" do Supabase. Sem ela, o app usa SQLite, que **é apagado a cada deploy ou reinício** no plano Free.
+- `ML_CLIENT_ID`, `ML_CLIENT_SECRET`, `AMAZON_*`, `SHOPEE_*`: chaves das lojas.
+
+No plano Free, o serviço "dorme" depois de 15 min sem uso. A primeira visita depois disso leva cerca de 50 s.
+
+---
+
 ## Como adicionar uma loja nova
 
 1. Crie `backend/app/adapters/minha_loja.py`:
