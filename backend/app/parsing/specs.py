@@ -29,10 +29,11 @@ CATEGORY_WORDS: list[tuple[str, str]] = [
     (r"tela|display|lcd|touch screen", "acessorio"),
     (r"teclado|mouse|mousepad|suporte|base refrigeradora|cooler para|cooler notebook|webcam|headset|fone", "acessorio"),
     (r"kit upgrade|kit memoria|kit", "acessorio"),
+    (r"caneta|stylus|pencil|s pen|ponteira|estojo", "acessorio"),
     # produtos
     (r"notebooks?|laptops?|macbook|chromebook|ultrabook|netbook|notebok|note gamer", "notebook"),
     (r"all in one|all-in-one|aio|mini pc|pc gamer|pc|computador|desktop|workstation|imac|mac mini", "desktop"),
-    (r"tablets?|ipad|galaxy tab|idea tab|redmi pad|xiaomi pad", "tablet"),
+    (r"tablets?|ipad|galaxy tab|idea tab|redmi pad|xiaomi pad|tab", "tablet"),
     (r"monitor|monitores", "monitor"),
     (r"placa de video|placa video|placa grafica|gpu", "placa_video"),
     (r"placa mae|placa-mae|motherboard", "placa_mae"),
@@ -393,7 +394,7 @@ def _residual_keywords(t: str, specs: Specs) -> list[str]:
     for w in t.split():
         if w in _STOPWORDS or len(w) < 3 or any(ch.isdigit() for ch in w):
             continue
-        if specs.category and re.fullmatch(r"notebook|laptop|tablet|pc|computador|desktop|monitor", w):
+        if specs.category and re.fullmatch(r"notebooks?|laptops?|tablets?|tab|ipad|pad|pc|computador|desktop|monitor|galaxy", w):
             continue
         if re.fullmatch(r"i[3579]|ryzen|ultra|rtx|gtx|rx", w):
             continue

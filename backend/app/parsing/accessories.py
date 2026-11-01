@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import re
 
-_PRODUCTS = r"(?:notebook|laptop|macbook|chromebook|tablet|ipad|pc|computador)"
+_PRODUCTS = r"(?:notebook|laptop|macbook|chromebook|tablet|ipad|tab|pc|computador|celular|smartphone)"
 # "para notebook", "p notebook", "compativel com notebook", "reposicao notebook"
 _FOR_PRODUCT = re.compile(
-    rf"\b(?:para|p|pra|compativel com|compativel|serve em|serve no|reposicao|substituicao|refil)\s(?:o\s|a\s|seu\s|sua\s)?(?:\w+\s)?{_PRODUCTS}\b"
+    rf"\b(?:para|p|pra|compativel com|compativel|serve em|serve no|reposicao|substituicao|refil)\s(?:o\s|a\s|seu\s|sua\s)?(?:\w+\s){{0,2}}{_PRODUCTS}\b"
 )
 _FIRST_PRODUCT = re.compile(rf"\b{_PRODUCTS}\b")
 

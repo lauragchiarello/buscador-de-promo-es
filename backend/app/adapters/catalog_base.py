@@ -33,6 +33,8 @@ class CatalogAdapter(StoreAdapter):
         cat = query.specs.get("category")
         if cat in self.category_paths:
             return self.category_paths[cat]
+        if cat:
+            return []  # a loja não tem essa categoria (ex.: tablet na Terabyte): nada a mostrar
         if query.specs.get("gpu") and "placa_video" in self.category_paths:
             return list(dict.fromkeys(self.category_paths.get("*", []) + self.category_paths["placa_video"]))
         return self.category_paths.get("*", [])

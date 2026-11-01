@@ -323,3 +323,11 @@ async def test_terabyte_blocked_uses_old_catalog():
     offers = await TerabyteAdapter(settings, http=http).search(_tb_query("desktop"))
     await http.aclose()
     assert len(offers) == 3
+
+
+def test_catalog_store_without_category_returns_nothing():
+    # A Terabyte não tem página de tablets: não pode cair no catálogo de notebooks/PCs
+    q = SearchQuery(raw="samsung tab", specs={"category": "tablet", "brand": "samsung"}, store_terms=["tablet samsung"])
+    assert TerabyteAdapter(Settings()).paths_for(q) == []
+    q2 = SearchQuery(raw="rtx 4060", specs={"gpu": "rtx 4060"}, store_terms=["rtx 4060"])
+    assert "/hardware/placas-de-video/nvidia-geforce" in TerabyteAdapter(Settings()).paths_for(q2)

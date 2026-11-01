@@ -10,6 +10,7 @@ Regras:
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 from .accessories import is_accessory
@@ -124,6 +125,9 @@ def match(query: Specs, title: str, offer_specs: Specs | None = None) -> MatchRe
         have = getattr(offer, f)
 
         if have in (None, ""):
+            # Títulos sempre trazem a marca: se ela não aparece, não é o produto pedido.
+            if f == "brand":
+                return _reject(offer, f"não é da marca {_fmt(f, query)}")
             # Categoria ausente é comum em títulos curtos; os outros campos geram aviso.
             got += WEIGHTS[f] * 0.5
             if f != "category":
@@ -179,7 +183,11 @@ def match(query: Specs, title: str, offer_specs: Specs | None = None) -> MatchRe
             return _reject(offer, f"{LABELS[f]} {_fmt(f, offer)} (pedido {_fmt(f, query)})")
 
     # Palavras extras da busca ("gamer", "oled") viram bônus/aviso leve
-    missing_kw = [k for k in query.keywords if k not in norm]
+    missing_kw = [k for k in query.keywords if not re.search(rf"\b{re.escape(k)}", norm)]
+    # Busca "vaga" (sem RAM/processador/GPU...): as palavras digitadas precisam aparecer.
+    strong = any(getattr(query, f) for f in ("ram_gb", "storage_gb", "cpu_line", "cpu_model", "gpu", "screen_in"))
+    if missing_kw and not strong:
+        return _reject(offer, "não menciona: " + ", ".join(missing_kw))
     score = round(100 * got / total)
     if query.keywords:
         score = max(0, score - 5 * len(missing_kw))

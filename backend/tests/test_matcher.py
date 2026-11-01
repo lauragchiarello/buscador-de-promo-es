@@ -91,3 +91,59 @@ def test_query_without_specs_accepts_everything_but_accessories():
     q = extract_specs("notebook", is_query=True)
     assert match(q, "Notebook Dell Inspiron 15").accepted
     assert not match(q, "Capa para notebook 15.6").accepted
+
+
+# --- Buscas "vagas" (só marca/categoria) precisam ser rigorosas -------------
+
+SAMSUNG_TAB_ACCEPT = [
+    "Tablet Samsung Galaxy Tab S10 Fe Wifi, 128GB, 8GB, Tela 10.9 90hz",
+    "Tablet Samsung Tab A11 Wifi 64gb 4gb Ram Tela 8.7",
+    "Tablet Samsung Galaxy Tab S12+ 512gb Wifi - Cinza, Com Caneta S Pen E Capa Teclado",
+]
+SAMSUNG_TAB_REJECT = [
+    ("PC GAMER CAPTAIN Intel Core i5 12400F / NVIDIA GeForce RTX 5060 / 16GB DDR4", "pc"),
+    ("PC Gamer NOIR Intel Core Ultra 5 245KF / Radeon RX 9060 XT 16GB", "pc"),
+    ("Caneta Dinamic para Samsung Galaxy Tab S9 FE - Touch e esferográfica", "acessório"),
+    ("Capa Para Samsung Galaxy Tab S9 Fe 10.9 Polegadas", "acessório"),
+    ("Pelicula de Vidro para Galaxy Tab S10 Fe", "acessório"),
+    ("Tablet Lenovo Idea Tab Pro 12GB RAM 256GB", "marca"),
+    ("Notebook Samsung Galaxy Book4 Intel Core i5 8GB 256GB", "notebook"),
+]
+
+
+def test_samsung_tab_query_is_understood():
+    q = extract_specs("samsung tab", is_query=True)
+    assert q.category == "tablet" and q.brand == "samsung" and q.keywords == []
+
+
+@pytest.mark.parametrize("title", SAMSUNG_TAB_ACCEPT)
+def test_samsung_tab_accepts_tablets(title):
+    assert match(extract_specs("samsung tab", is_query=True), title).accepted
+
+
+@pytest.mark.parametrize("title,why", SAMSUNG_TAB_REJECT)
+def test_samsung_tab_rejects_others(title, why):
+    r = match(extract_specs("samsung tab", is_query=True), title)
+    assert not r.accepted
+    assert why.lower() in r.rejected_because.lower()
+
+
+def test_brand_missing_from_title_is_rejected():
+    r = match(extract_specs("notebook dell", is_query=True), "Notebook Gamer i7 16GB RTX 4060")
+    assert not r.accepted and "dell" in r.rejected_because.lower()
+
+
+def test_brand_from_product_line_counts():
+    # "IdeaPad" é linha da Lenovo: a marca conta mesmo sem a palavra "Lenovo"
+    assert match(extract_specs("notebook lenovo", is_query=True), "Notebook IdeaPad Slim 3 i5 8GB").accepted
+
+
+def test_vague_query_requires_typed_words():
+    r = match(extract_specs("notebook gamer", is_query=True), "Notebook Dell Inspiron 15 i5 8GB")
+    assert not r.accepted and "gamer" in r.rejected_because
+
+
+def test_specific_query_keeps_keywords_soft():
+    # Com specs fortes, palavra extra só tira pontos (não exclui)
+    r = match(extract_specs("notebook gamer rtx 4060", is_query=True), "Notebook Acer Nitro V15 i7-13620H 16GB RTX 4060")
+    assert r.accepted and any("gamer" in x for x in r.reasons)
