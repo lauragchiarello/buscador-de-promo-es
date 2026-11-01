@@ -4,6 +4,7 @@ import { streamSearch } from '../services/api.js';
 const initialState = {
   status: 'idle', // idle | loading | done | error
   query: '',
+  category: '', // tipo de produto usado na busca atual
   specs: null,
   terms: [],
   stores: {}, // slug -> {name, status, message, cached, elapsed_ms, total_found, excluded_count, excluded_samples}
@@ -15,7 +16,7 @@ const initialState = {
 function reducer(state, action) {
   switch (action.type) {
     case 'start':
-      return { ...initialState, status: 'loading', query: action.query, startedAt: Date.now() };
+      return { ...initialState, status: 'loading', query: action.query, category: action.category || '', startedAt: Date.now() };
     case 'query':
       return { ...state, specs: action.data.specs, terms: action.data.terms };
     case 'store_status':
@@ -51,11 +52,11 @@ export function useSearch() {
 
   const search = useCallback((query, opts = {}) => {
     cancelRef.current?.();
-    dispatch({ type: 'start', query });
+    dispatch({ type: 'start', query, category: opts.category });
     // Pedimos usados também; os filtros são aplicados na tela, sem buscar de novo.
     cancelRef.current = streamSearch(
       query,
-      { includeUsed: true, fresh: opts.fresh },
+      { includeUsed: true, fresh: opts.fresh, category: opts.category },
       {
         onQuery: (data) => dispatch({ type: 'query', data }),
         onStoreStatus: (data) => dispatch({ type: 'store_status', data }),

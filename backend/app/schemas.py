@@ -76,6 +76,9 @@ def build_store_terms(raw: str, specs: Specs) -> list[str]:
     elif specs.category == "desktop":
         parts_specific.append("pc")
         parts_broad.append("pc")
+    elif specs.category == "celular":
+        parts_specific.append("celular")
+        parts_broad.append("celular")
     elif specs.category == "placa_video":
         parts_specific.append("placa de video")
         parts_broad.append("placa de video")

@@ -16,9 +16,10 @@ router = APIRouter(prefix="/api")
 
 def _filters(
     stores: str | None, min_price: float | None, max_price: float | None,
-    official_only: bool, include_used: bool, fresh: bool,
+    official_only: bool, include_used: bool, fresh: bool, category: str | None = None,
 ) -> SearchFilters:
     return SearchFilters(
+        category=category or None,
         stores=[s for s in (stores or "").split(",") if s] or None,
         min_price=min_price, max_price=max_price,
         official_only=official_only, include_used=include_used, use_cache=not fresh,
@@ -44,9 +45,9 @@ def stores(request: Request) -> list[dict]:
 
 
 @router.get("/parse")
-def parse(q: str = Query(..., min_length=2, max_length=300)) -> dict:
+def parse(q: str = Query(..., min_length=2, max_length=300), category: str | None = None) -> dict:
     """Mostra como o texto foi entendido (útil para depurar o parser)."""
-    specs, query = parse_query(q)
+    specs, query = parse_query(q, category)
     return {"specs": specs.to_dict(), "terms": query.store_terms}
 
 
@@ -60,9 +61,10 @@ async def search_stream(
     official_only: bool = False,
     include_used: bool = False,
     fresh: bool = False,
+    category: str | None = None,
 ):
     """Busca com Server-Sent Events: cada loja chega assim que responde."""
-    f = _filters(stores, min_price, max_price, official_only, include_used, fresh)
+    f = _filters(stores, min_price, max_price, official_only, include_used, fresh, category)
     orchestrator = request.app.state.orchestrator
 
     async def events():
@@ -87,9 +89,10 @@ async def search(
     official_only: bool = False,
     include_used: bool = False,
     fresh: bool = False,
+    category: str | None = None,
 ) -> dict:
     """Mesma busca, mas devolve tudo de uma vez (bom para testes e scripts)."""
-    f = _filters(stores, min_price, max_price, official_only, include_used, fresh)
+    f = _filters(stores, min_price, max_price, official_only, include_used, fresh, category)
     result: dict = {"stores": [], "offers": []}
     async for ev in request.app.state.orchestrator.stream(q, f):
         if ev["type"] == "query":

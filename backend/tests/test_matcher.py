@@ -147,3 +147,49 @@ def test_specific_query_keeps_keywords_soft():
     # Com specs fortes, palavra extra só tira pontos (não exclui)
     r = match(extract_specs("notebook gamer rtx 4060", is_query=True), "Notebook Acer Nitro V15 i7-13620H 16GB RTX 4060")
     assert r.accepted and any("gamer" in x for x in r.reasons)
+
+
+# --- Celulares e filtro de tipo de produto -----------------------------------
+
+from app.services.orchestrator import parse_query  # noqa: E402
+
+
+@pytest.mark.parametrize("text,category,model", [
+    ("Apple iPhone 15 Pro Max 256GB Titânio Natural", "celular", "iphone 15 pro max"),
+    ("Smartphone Samsung Galaxy S24 Ultra 512GB 12GB RAM", "celular", "galaxy s24 ultra"),
+    ("Celular Motorola Moto G85 5G 256GB 8GB RAM", "celular", "moto g85"),
+    ("Smartphone Xiaomi Redmi Note 14 Pro 5G 256GB", "celular", "redmi note 14 pro"),
+    ("Smartphone Samsung Galaxy A55 5G 128GB", "celular", "galaxy a55"),
+    ("Tablet Samsung Galaxy Tab S9 FE 128GB", "tablet", None),
+    ("Capa Para iPhone 15 Pro Silicone Preta", "acessorio", None),
+    ("Película de Vidro Galaxy S24 Ultra", "acessorio", None),
+])
+def test_phone_titles(text, category, model):
+    s = extract_specs(text)
+    assert s.category == category
+    if category == "celular":
+        assert s.phone_model == model
+
+
+def test_iphone_model_is_required():
+    q = extract_specs("iphone 15", is_query=True)
+    assert q.brand == "apple" and q.phone_model == "iphone 15"
+    assert match(q, "Apple iPhone 15 128GB Preto").accepted
+    variant = match(q, "Apple iPhone 15 Pro 256GB")
+    assert variant.accepted and any("Variação" in r for r in variant.reasons)
+    assert not match(q, "iPhone 13 128GB Meia-noite").accepted
+    assert not match(q, "Apple iPhone 16 128GB").accepted
+    assert not match(extract_specs("iphone 15 pro", is_query=True), "Apple iPhone 15 128GB").accepted
+
+
+def test_product_type_filter_overrides_query():
+    specs, q = parse_query("samsung", "celular")
+    assert specs.category == "celular" and q.store_terms[0] == "celular samsung"
+    assert q.raw == "samsung [celular]"  # cache separado por tipo
+    assert match(specs, "Smartphone Samsung Galaxy A55 5G 128GB").accepted
+    assert not match(specs, "Tablet Samsung Galaxy Tab S9 FE").accepted
+    assert not match(specs, "Notebook Samsung Galaxy Book4 i5 8GB").accepted
+    assert not match(specs, "Capa Para Samsung Galaxy A55").accepted
+    # tipo inválido é ignorado
+    s2, q2 = parse_query("samsung", "geladeira")
+    assert s2.category is None and q2.raw == "samsung"

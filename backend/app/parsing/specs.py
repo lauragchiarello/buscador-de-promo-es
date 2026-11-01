@@ -34,6 +34,7 @@ CATEGORY_WORDS: list[tuple[str, str]] = [
     (r"notebooks?|laptops?|macbook|chromebook|ultrabook|netbook|notebok|note gamer", "notebook"),
     (r"all in one|all-in-one|aio|mini pc|pc gamer|pc|computador|desktop|workstation|imac|mac mini", "desktop"),
     (r"tablets?|ipad|galaxy tab|idea tab|redmi pad|xiaomi pad|tab", "tablet"),
+    (r"celular|celulares|smartphones?|iphone|galaxy [saz]\d{1,3}|galaxy z fold|galaxy z flip|moto [ge]\d{0,3}|motorola edge|motorola razr|redmi note|redmi \d{1,2}|poco [xfmc]\d|xiaomi \d{1,2}|realme \d{1,2}", "celular"),
     (r"monitor|monitores", "monitor"),
     (r"placa de video|placa video|placa grafica|gpu", "placa_video"),
     (r"placa mae|placa-mae|motherboard", "placa_mae"),
@@ -49,13 +50,13 @@ _CATEGORY_RES = [(re.compile(rf"\b(?:{pat})\b"), cat) for pat, cat in CATEGORY_W
 BRANDS = [
     "acer", "asus", "dell", "lenovo", "hp", "samsung", "apple", "msi", "gigabyte",
     "avell", "positivo", "vaio", "lg", "multilaser", "concordia", "alienware",
-    "razer", "huawei", "xiaomi", "microsoft", "compaq", "philco", "galaxy book",
+    "razer", "huawei", "xiaomi", "motorola", "realme", "oneplus", "redmi", "poco", "iphone", "ipad", "macbook", "microsoft", "compaq", "philco", "galaxy book",
     "legion", "ideapad", "thinkpad", "vivobook", "zenbook", "rog", "tuf", "nitro",
     "predator", "aspire", "inspiron", "vostro", "latitude", "pavilion", "victus", "omen",
 ]
 # Marca "mãe" de algumas linhas
 _LINE_TO_BRAND = {
-    "legion": "lenovo", "ideapad": "lenovo", "thinkpad": "lenovo",
+    "legion": "lenovo", "ideapad": "lenovo", "thinkpad": "lenovo", "redmi": "xiaomi", "poco": "xiaomi", "iphone": "apple", "ipad": "apple", "macbook": "apple",
     "vivobook": "asus", "zenbook": "asus", "rog": "asus", "tuf": "asus",
     "nitro": "acer", "predator": "acer", "aspire": "acer",
     "inspiron": "dell", "vostro": "dell", "latitude": "dell", "alienware": "dell",
@@ -124,6 +125,7 @@ class Specs:
     cpu_generation: int | None = None  # Intel: 13; Ryzen: 7 (série 7000); Ultra: 1/2; Apple: 3
     cpu_model: str | None = None  # 13700h, 7735hs, 155h
     gpu: str | None = None  # "rtx 4060", "rx 7600"
+    phone_model: str | None = None  # "iphone 15 pro", "galaxy s24 ultra", "moto g85"
     screen_in: float | None = None
     keywords: list[str] = field(default_factory=list)  # palavras não reconhecidas (só na busca)
     ram_inferred: bool = False  # RAM deduzida sem a palavra "ram"
@@ -345,6 +347,30 @@ def _extract_screen(t: str) -> float | None:
     return None
 
 
+# Modelos de celular: "iphone 15 pro max", "galaxy s24 ultra", "galaxy a55", "moto g85", "redmi note 14 pro"
+_PHONE_MODELS = [
+    re.compile(r"\biphone\s(\d{1,2}e?)(?:\s(pro max|pro|plus|mini))?\b"),
+    re.compile(r"\bgalaxy\s(z fold\s?\d|z flip\s?\d|[sam]\d{1,3})(?:\s?(ultra|plus|fe|\+))?\b"),
+    re.compile(r"\bmoto(?:rola)?\s([ge]\d{1,3})(?:\s(power|play|stylus))?\b"),
+    re.compile(r"\bmotorola\s(edge\s\d{1,2})(?:\s(pro|neo|fusion|ultra))?\b"),
+    re.compile(r"\bredmi\s(note\s\d{1,2}|\d{1,2}[ac]?)(?:\s(pro\+?|pro plus|s))?\b"),
+    re.compile(r"\bpoco\s([xfmc]\d)(?:\s(pro|ultra))?\b"),
+]
+_PHONE_PREFIX = ["iphone", "galaxy", "moto", "motorola", "redmi", "poco"]
+
+
+def _extract_phone_model(t: str) -> str | None:
+    for prefix, rx in zip(_PHONE_PREFIX, _PHONE_MODELS):
+        m = rx.search(t)
+        if m:
+            base = re.sub(r"\s+", "", m.group(1)) if prefix == "galaxy" else m.group(1)
+            name = f"{'moto' if prefix == 'moto' else prefix} {base}"
+            if m.group(2):
+                name += " " + m.group(2).replace("+", "plus")
+            return name
+    return None
+
+
 def _extract_brand(t: str) -> str | None:
     m = _BRAND_RE.search(t)
     if not m:
@@ -376,10 +402,11 @@ def extract_specs(text: str, *, is_query: bool = False) -> Specs:
     for k, v in _extract_cpu(t).items():
         setattr(specs, k, v)
     specs.gpu = _extract_gpu(t)
+    specs.phone_model = _extract_phone_model(t)
     specs.screen_in = _extract_screen(t)
 
     # Tablets/celulares: um "128gb" solto é armazenamento, não RAM.
-    if specs.category == "tablet" and specs.ram_inferred and specs.ram_gb and specs.ram_gb >= 32:
+    if specs.category in ("tablet", "celular") and specs.ram_inferred and specs.ram_gb and specs.ram_gb >= 32:
         specs.storage_gb = specs.storage_gb or specs.ram_gb
         specs.ram_gb, specs.ram_inferred = None, False
 
@@ -394,7 +421,7 @@ def _residual_keywords(t: str, specs: Specs) -> list[str]:
     for w in t.split():
         if w in _STOPWORDS or len(w) < 3 or any(ch.isdigit() for ch in w):
             continue
-        if specs.category and re.fullmatch(r"notebooks?|laptops?|tablets?|tab|ipad|pad|pc|computador|desktop|monitor|galaxy", w):
+        if specs.category and re.fullmatch(r"notebooks?|laptops?|tablets?|tab|ipad|pad|pc|computador|desktop|monitor|galaxy|celular|celulares|smartphones?|aparelho|moto|redmi|poco|note|pro|max|plus|ultra|fe|lite", w):
             continue
         if re.fullmatch(r"i[3579]|ryzen|ultra|rtx|gtx|rx", w):
             continue

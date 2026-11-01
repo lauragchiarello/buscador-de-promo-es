@@ -22,9 +22,13 @@
 }
 
 .heroSearch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   width: 100%;
   max-width: var(--modal-width-lg);
   margin-top: var(--space-4);
+  text-align: left;
 }
 
 .examples {
@@ -55,6 +59,9 @@
 }
 
 .searchRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   max-width: var(--modal-width-lg);
 }
 

@@ -5,6 +5,7 @@ const CATEGORY = {
   notebook: 'Notebook',
   desktop: 'PC',
   tablet: 'Tablet',
+  celular: 'Celular',
   monitor: 'Monitor',
   placa_video: 'Placa de vídeo',
   placa_mae: 'Placa-mãe',
@@ -31,11 +32,20 @@ export function cpuLabel(specs) {
   return label;
 }
 
+/** "iphone 15 pro" -> "iPhone 15 Pro", "galaxy s24 ultra" -> "Galaxy S24 Ultra" */
+export function phoneLabel(model) {
+  return model
+    .split(' ')
+    .map((w) => (w === 'iphone' ? 'iPhone' : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join(' ');
+}
+
 /** Lista de "chips" para mostrar como a busca/anúncio foi entendido. */
 export function specChips(specs = {}) {
   const chips = [];
   if (specs.category) chips.push(CATEGORY[specs.category] || specs.category);
   if (specs.brand) chips.push(specs.brand[0].toUpperCase() + specs.brand.slice(1));
+  if (specs.phone_model) chips.push(phoneLabel(specs.phone_model));
   const cpu = cpuLabel(specs);
   if (cpu) chips.push(cpu);
   if (specs.ram_gb) chips.push(`${formatGB(specs.ram_gb)} RAM`);

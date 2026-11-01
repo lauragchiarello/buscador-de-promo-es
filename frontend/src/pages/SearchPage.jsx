@@ -9,18 +9,20 @@ import OfferList from '../components/features/OfferList/OfferList.jsx';
 import SortControl from '../components/features/SortControl/SortControl.jsx';
 import StoreStatusBar from '../components/features/StoreStatusBar/StoreStatusBar.jsx';
 import QuerySummary from '../components/features/QuerySummary/QuerySummary.jsx';
+import ProductTypeFilter from '../components/features/ProductTypeFilter/ProductTypeFilter.jsx';
 import { useSearch } from '../hooks/useSearch.js';
 import { useStores } from '../hooks/useStores.js';
 import { useDebounce } from '../hooks/useDebounce.js';
 import { DEFAULT_FILTERS, useFilteredOffers } from '../hooks/useFilteredOffers.js';
 
-const EXAMPLES = ['notebook 32gb ram i7 13th', 'notebook ryzen 7 7735hs 16gb', 'notebook rtx 4060 16gb', 'placa de video rtx 4060'];
+const EXAMPLES = ['notebook 32gb ram i7 13th', 'iphone 15 128gb', 'samsung tab', 'placa de video rtx 4060'];
 
 /** Tela principal: campo de busca, filtros e resultados que chegam loja por loja. */
 export default function SearchPage() {
   const [text, setText] = useState('');
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [sort, setSort] = useState('price');
+  const [productType, setProductType] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const { state, search } = useSearch();
   const { stores, error: storesError } = useStores();
@@ -30,9 +32,15 @@ export default function SearchPage() {
   const loading = state.status === 'loading';
   const started = state.status !== 'idle';
 
-  const run = (q, opts) => {
+  const run = (q, opts = {}) => {
     setText(q);
-    search(q, opts);
+    search(q, { category: productType, ...opts });
+  };
+
+  // Trocar o tipo de produto refaz a busca atual com o novo tipo.
+  const changeType = (value) => {
+    setProductType(value);
+    if (state.query) search(state.query, { category: value });
   };
 
   const filterPanel = (
@@ -48,6 +56,7 @@ export default function SearchPage() {
         </p>
         <div className={styles.heroSearch}>
           <SearchBar value={text} onChange={setText} onSubmit={run} placeholder="ex.: notebook 32gb ram i7 13th" autoFocus />
+          <ProductTypeFilter value={productType} onChange={setProductType} />
         </div>
         <div className={styles.examples}>
           <span className={styles.examplesLabel}>Experimente:</span>
@@ -72,6 +81,7 @@ export default function SearchPage() {
     <div className={styles.page}>
       <div className={styles.searchRow}>
         <SearchBar value={text} onChange={setText} onSubmit={run} loading={loading} />
+        <ProductTypeFilter value={productType} onChange={changeType} />
       </div>
 
       <div className={styles.layout}>

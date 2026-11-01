@@ -25,6 +25,7 @@ WEIGHTS = {
     "cpu_generation": 20,
     "cpu_model": 15,
     "gpu": 20,
+    "phone_model": 30,
     "screen_in": 5,
     "brand": 8,
 }
@@ -37,6 +38,7 @@ LABELS = {
     "cpu_generation": "geração do processador",
     "cpu_model": "modelo do processador",
     "gpu": "placa de vídeo",
+    "phone_model": "modelo",
     "screen_in": "tamanho da tela",
     "brand": "marca",
 }
@@ -48,12 +50,13 @@ MISSING_MSG = {
     "cpu_generation": "Geração do processador não informada no título",
     "cpu_model": "Modelo exato do processador não informado",
     "gpu": "Placa de vídeo não informada no título",
+    "phone_model": "Modelo do aparelho não informado no título",
     "screen_in": "Tamanho da tela não informado",
     "brand": "Marca não informada no título",
 }
 
 CATEGORY_LABELS = {
-    "notebook": "notebook", "desktop": "PC", "tablet": "tablet", "monitor": "monitor",
+    "notebook": "notebook", "desktop": "PC", "tablet": "tablet", "celular": "celular", "monitor": "monitor",
     "placa_video": "placa de vídeo", "placa_mae": "placa-mãe", "processador": "processador",
     "memoria": "memória", "armazenamento": "SSD/HD", "fonte": "fonte", "gabinete": "gabinete",
     "acessorio": "acessório",
@@ -156,6 +159,17 @@ def match(query: Specs, title: str, offer_specs: Specs | None = None) -> MatchRe
                 got += WEIGHTS[f]
             else:
                 return _reject(offer, f"é {CATEGORY_LABELS.get(have, have)}, não {CATEGORY_LABELS.get(want, want)}")
+            continue
+
+        if f == "phone_model":
+            # "iphone 15" aceita "iphone 15 pro" (com aviso); "iphone 15 pro" não aceita "iphone 15"
+            if have == want:
+                got += WEIGHTS[f]
+            elif have.startswith(want + " "):
+                got += WEIGHTS[f] * 0.8
+                reasons.append(f"Variação do modelo: {have.title()}")
+            else:
+                return _reject(offer, f"modelo {have.title()} (pedido {want.title()})")
             continue
 
         if f == "gpu":

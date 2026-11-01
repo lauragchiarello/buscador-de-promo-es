@@ -38,11 +38,23 @@ class SearchFilters(BaseModel):
     official_only: bool = False
     include_used: bool = False
     use_cache: bool = True
+    category: str | None = None  # tipo de produto escolhido no filtro (notebook, tablet, celular...)
 
 
-def parse_query(raw: str) -> tuple[Specs, SearchQuery]:
+CATEGORIES = {
+    "celular", "tablet", "notebook", "desktop", "monitor", "placa_video",
+    "processador", "memoria", "armazenamento", "placa_mae", "fonte", "gabinete",
+}
+
+
+def parse_query(raw: str, category: str | None = None) -> tuple[Specs, SearchQuery]:
+    """Interpreta a busca. Se um tipo de produto foi escolhido no filtro, ele prevalece."""
     specs = extract_specs(raw, is_query=True)
-    return specs, SearchQuery(raw=raw, specs=specs.to_dict(), store_terms=build_store_terms(raw, specs))
+    key = raw
+    if category in CATEGORIES:
+        specs.category = category
+        key = f"{raw} [{category}]"  # cache/fila separados por tipo
+    return specs, SearchQuery(raw=key, specs=specs.to_dict(), store_terms=build_store_terms(raw, specs))
 
 
 def evaluate_offers(specs: Specs, offers: list[Offer]) -> tuple[list[Offer], list[dict]]:
@@ -162,7 +174,7 @@ class SearchOrchestrator:
             return {**base, "status": "unavailable", "message": f"Erro inesperado: {type(exc).__name__}", "offers": []}
 
     async def stream(self, raw: str, f: SearchFilters) -> AsyncIterator[dict]:
-        specs, query = parse_query(raw)
+        specs, query = parse_query(raw, f.category)
         await asyncio.to_thread(_record_search, raw, specs)
         selected = [a for slug, a in self.adapters.items() if not f.stores or slug in f.stores]
         yield {"type": "query", "raw": raw, "specs": specs.to_dict(), "terms": query.store_terms}

@@ -44,6 +44,7 @@ function toParams(query, filters = {}) {
   if (filters.officialOnly) params.set('official_only', 'true');
   if (filters.includeUsed) params.set('include_used', 'true');
   if (filters.fresh) params.set('fresh', 'true');
+  if (filters.category) params.set('category', filters.category);
   return params.toString();
 }
 
@@ -70,7 +71,7 @@ export function clearCache() {
  * Busca com resultados chegando aos poucos (Server-Sent Events).
  *
  * @param {string} query
- * @param {object} filters   {stores, minPrice, maxPrice, officialOnly, includeUsed, fresh}
+ * @param {object} filters   {stores, minPrice, maxPrice, officialOnly, includeUsed, fresh, category}
  * @param {object} handlers  {onQuery, onStoreStatus, onStoreResult, onDone, onError}
  * @returns {() => void}     Função para cancelar a busca.
  */
