@@ -1,0 +1,138 @@
+/*
+ * Design tokens — a ÚNICA fonte de valores visuais do app.
+ * Componentes usam só estas variáveis (nunca cores, tamanhos ou sombras soltos).
+ */
+:root {
+  /* ---- Cores: base ---- */
+  --color-bg: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f0f2f5;
+  --color-surface-hover: #f8f9fb;
+  --color-border: #e4e7eb;
+  --color-border-strong: #cfd4dc;
+  --color-overlay: rgb(17 24 39 / 0.38);
+
+  /* ---- Cores: texto ---- */
+  --color-text: #1f2933;
+  --color-text-muted: #6b7280;
+  --color-text-subtle: #9aa1ac;
+  --color-text-inverse: #ffffff;
+
+  /* ---- Cor de destaque (única) ---- */
+  --color-accent: #3a6fe0;
+  --color-accent-hover: #2f5dc4;
+  --color-accent-active: #284fa8;
+  --color-accent-soft: #eaf0fd;
+  --color-accent-soft-hover: #dde7fb;
+  --color-focus-ring: rgb(58 111 224 / 0.32);
+
+  /* ---- Alerta / desconto ---- */
+  --color-deal: #e8590c;
+  --color-deal-soft: #fdeee6;
+
+  /* ---- Feedback ---- */
+  --color-success: #2f9e6b;
+  --color-success-soft: #e6f5ee;
+  --color-error: #d64545;
+  --color-error-soft: #fbeaea;
+  --color-warning: #c98a0b;
+  --color-warning-soft: #fdf5e3;
+
+  /* ---- Tipografia ---- */
+  --font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-mono: ui-monospace, 'SF Mono', Consolas, 'Liberation Mono', monospace;
+  --font-size-xs: 0.75rem;   /* 12 */
+  --font-size-sm: 0.875rem;  /* 14 */
+  --font-size-md: 1rem;      /* 16 */
+  --font-size-lg: 1.125rem;  /* 18 */
+  --font-size-xl: 1.375rem;  /* 22 */
+  --font-size-2xl: 1.75rem;  /* 28 */
+  --font-size-3xl: 2.25rem;  /* 36 */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.2;
+  --line-height-base: 1.5;
+
+  /* ---- Espaçamento (escala de 4px) ---- */
+  --space-0: 0;
+  --space-1: 0.25rem;  /* 4 */
+  --space-2: 0.5rem;   /* 8 */
+  --space-3: 0.75rem;  /* 12 */
+  --space-4: 1rem;     /* 16 */
+  --space-5: 1.5rem;   /* 24 */
+  --space-6: 2rem;     /* 32 */
+  --space-7: 2.5rem;   /* 40 */
+  --space-8: 3rem;     /* 48 */
+  --space-9: 4rem;     /* 64 */
+
+  /* ---- Raios ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* ---- Sombras ---- */
+  --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.06);
+  --shadow-md: 0 2px 4px rgb(16 24 40 / 0.04), 0 6px 16px rgb(16 24 40 / 0.07);
+  --shadow-lg: 0 8px 24px rgb(16 24 40 / 0.1), 0 2px 6px rgb(16 24 40 / 0.05);
+  --shadow-focus: 0 0 0 3px var(--color-focus-ring);
+
+  /* ---- Transições ---- */
+  --transition-fast: 120ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 320ms ease;
+
+  /* ---- Tamanhos de controles ---- */
+  --control-height-sm: 2rem;     /* 32 */
+  --control-height-md: 2.5rem;   /* 40 */
+  --control-height-lg: 3.25rem;  /* 52 */
+  --icon-size-sm: 16px;
+  --icon-size-md: 20px;
+  --icon-size-lg: 24px;
+  --border-width: 1px;
+  --border-width-strong: 2px;
+
+  /* ---- Cores das lojas (só no StoreTag) ---- */
+  --store-kabum: #0060b1;
+  --store-mercadolivre: #ffe600;
+  --store-mercadolivre-text: #2d3277;
+  --store-amazon: #232f3e;
+  --store-shopee: #ee4d2d;
+  --store-pichau: #e30613;
+  --store-fastshop: #c4161c;
+  --store-terabyte: #111111;
+
+  /* ---- Estados e detalhes ---- */
+  --opacity-disabled: 0.55;
+  --opacity-muted: 0.85;
+  --letter-spacing-tight: -0.01em;
+  --letter-spacing-wide: 0.04em;
+  --lift-hover: -2px;
+  --press-offset: 1px;
+  --spinner-speed: 0.7s;
+
+  /* ---- Larguras de componentes ---- */
+  --modal-width-sm: 400px;
+  --modal-width-md: 560px;
+  --modal-width-lg: 840px;
+  --tooltip-max-width: 260px;
+  --toast-min-width: 260px;
+  --toast-max-width: 400px;
+  --text-max-width: 42ch;
+  --text-max-width-wide: 52ch;
+  --hero-title-max-width: 20ch;
+  /* Breakpoints (CSS não aceita variáveis em @media; use estes valores): mobile 560px, tablet 900px */
+
+  /* ---- Layout ---- */
+  --layout-max-width: 1200px;
+  --layout-sidebar-width: 260px;
+  --card-min-width: 260px;
+  --select-min-width: 9.5rem;
+  --offer-image-height: 168px;
+  --z-header: 10;
+  --z-overlay: 100;
+  --z-toast: 200;
+  --z-tooltip: 300;
+}

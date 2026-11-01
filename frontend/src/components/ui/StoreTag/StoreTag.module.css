@@ -1,0 +1,77 @@
+.tag {
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-inverse);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.md .logo {
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  font-size: var(--font-size-xs);
+}
+
+.sm .logo {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-sm);
+}
+
+.name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sm .name {
+  font-size: var(--font-size-xs);
+}
+
+.kabum {
+  background: var(--store-kabum);
+}
+
+.mercadolivre {
+  background: var(--store-mercadolivre);
+  color: var(--store-mercadolivre-text);
+}
+
+.amazon {
+  background: var(--store-amazon);
+}
+
+.shopee {
+  background: var(--store-shopee);
+}
+
+.pichau {
+  background: var(--store-pichau);
+}
+
+.fastshop {
+  background: var(--store-fastshop);
+}
+
+.terabyte {
+  background: var(--store-terabyte);
+}
+
+.default {
+  background: var(--color-text-muted);
+}

@@ -1,0 +1,69 @@
+{
+  "_comment": "Fixture montada no formato documentado de GET /sites/MLB/search (a API real exige token). Atualize com uma resposta real quando tiver credenciais.",
+  "site_id": "MLB",
+  "query": "notebook i7 13 geracao 32gb",
+  "paging": {"total": 4, "offset": 0, "limit": 50},
+  "results": [
+    {
+      "id": "MLB4000000001",
+      "title": "Notebook Dell Inspiron 15 I7-1355u 32gb Ssd 512gb 15.6 Fhd Win 11",
+      "condition": "new",
+      "price": 4899.0,
+      "original_price": 5799.0,
+      "currency_id": "BRL",
+      "permalink": "https://produto.mercadolivre.com.br/MLB-4000000001-notebook-dell-inspiron-15-_JM",
+      "thumbnail": "http://http2.mlstatic.com/D_123-I.jpg",
+      "installments": {"quantity": 10, "amount": 489.9, "rate": 0, "currency_id": "BRL"},
+      "shipping": {"free_shipping": true},
+      "seller": {"id": 111, "nickname": "DELL OFICIAL", "seller_reputation": {"power_seller_status": "platinum"}},
+      "official_store_id": 1234,
+      "official_store_name": "Dell",
+      "attributes": [
+        {"id": "BRAND", "value_name": "Dell"},
+        {"id": "PROCESSOR_LINE", "value_name": "Core i7"},
+        {"id": "PROCESSOR_MODEL", "value_name": "1355U"},
+        {"id": "RAM", "value_name": "32 GB"}
+      ]
+    },
+    {
+      "id": "MLB4000000002",
+      "title": "Notebook Lenovo Ideapad Slim 3 Core I7 13ª Geração Ssd 1tb",
+      "condition": "new",
+      "price": 5299.9,
+      "original_price": null,
+      "permalink": "https://produto.mercadolivre.com.br/MLB-4000000002-notebook-lenovo-_JM",
+      "thumbnail": "http://http2.mlstatic.com/D_456-I.jpg",
+      "installments": {"quantity": 12, "amount": 489.53, "rate": 8.5},
+      "shipping": {"free_shipping": false},
+      "seller": {"id": 222, "nickname": "LOJA_TECH_BR"},
+      "official_store_id": null,
+      "attributes": [{"id": "RAM", "value_name": "32 GB"}]
+    },
+    {
+      "id": "MLB4000000003",
+      "title": "Notebook Acer Aspire 5 I7-12650h 32gb 1tb Ssd",
+      "condition": "new",
+      "price": 4299.0,
+      "permalink": "https://produto.mercadolivre.com.br/MLB-4000000003-_JM",
+      "thumbnail": "http://http2.mlstatic.com/D_789-I.jpg",
+      "installments": {"quantity": 10, "amount": 429.9, "rate": 0},
+      "shipping": {"free_shipping": true},
+      "seller": {"id": 333, "nickname": "ACER_STORE"},
+      "official_store_id": 99,
+      "official_store_name": "Acer",
+      "attributes": []
+    },
+    {
+      "id": "MLB4000000004",
+      "title": "Carregador Fonte Para Notebook Dell Inspiron I7 65w",
+      "condition": "new",
+      "price": 89.9,
+      "permalink": "https://produto.mercadolivre.com.br/MLB-4000000004-_JM",
+      "thumbnail": "http://http2.mlstatic.com/D_000-I.jpg",
+      "installments": {"quantity": 1, "amount": 89.9, "rate": 0},
+      "shipping": {"free_shipping": false},
+      "seller": {"id": 444, "nickname": "PECAS_NOTE"},
+      "attributes": []
+    }
+  ]
+}

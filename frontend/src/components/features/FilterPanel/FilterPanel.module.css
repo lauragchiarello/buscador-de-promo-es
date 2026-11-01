@@ -1,0 +1,46 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--control-height-sm);
+}
+
+.heading {
+  font-size: var(--font-size-md);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.legend {
+  margin-bottom: var(--space-2);
+  padding: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.priceRow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.dash {
+  color: var(--color-text-subtle);
+}

@@ -1,0 +1,42 @@
+.price {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0);
+  line-height: var(--line-height-tight);
+}
+
+.list {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-subtle);
+  text-decoration: line-through;
+}
+
+.main {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.md .main {
+  font-size: var(--font-size-xl);
+}
+
+.lg .main {
+  font-size: var(--font-size-2xl);
+}
+
+.highlight {
+  color: var(--color-accent);
+}
+
+.caption {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+.installments {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}

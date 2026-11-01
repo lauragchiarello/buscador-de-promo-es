@@ -1,0 +1,5 @@
+.page {
+  max-width: var(--modal-width-lg);
+  margin: 0 auto;
+  padding: var(--space-8) 0;
+}

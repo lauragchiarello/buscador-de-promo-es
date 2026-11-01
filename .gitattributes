@@ -1,0 +1,2 @@
+*.sh text eol=lf
+.python-version text eol=lf

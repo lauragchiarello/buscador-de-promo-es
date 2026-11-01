@@ -1,0 +1,39 @@
+{
+  "_comment": "Fixture no formato documentado de POST /catalog/v1/searchItems da Creators API (a API real exige credenciais do Associados). Atualize com uma resposta real quando tiver acesso.",
+  "searchResult": {
+    "totalResultCount": 3,
+    "items": [
+      {
+        "asin": "B0TEST0001",
+        "detailPageURL": "https://www.amazon.com.br/dp/B0TEST0001?tag=meutag-20",
+        "images": {"primary": {"medium": {"url": "https://m.media-amazon.com/images/I/test1._SL160_.jpg", "height": 160, "width": 160}}},
+        "itemInfo": {"title": {"displayValue": "Notebook Lenovo IdeaPad Slim 3 Intel Core i7-13620H 32GB RAM SSD 1TB 15.3 Pol WUXGA Windows 11", "label": "Title", "locale": "pt_BR"}},
+        "offersV2": {"listings": [
+          {"availability": {"type": "IN_STOCK"}, "condition": {"value": "New"}, "isBuyBoxWinner": true,
+           "merchantInfo": {"name": "Amazon.com.br"},
+           "price": {"money": {"amount": 5199.0, "currency": "BRL", "displayAmount": "R$ 5.199,00"},
+                     "savingBasis": {"money": {"amount": 6499.0, "currency": "BRL", "displayAmount": "R$ 6.499,00"}, "savingBasisType": "LIST_PRICE"},
+                     "savings": {"money": {"amount": 1300.0, "currency": "BRL"}, "percentage": 20}}}
+        ]}
+      },
+      {
+        "asin": "B0TEST0002",
+        "detailPageURL": "https://www.amazon.com.br/dp/B0TEST0002?tag=meutag-20",
+        "images": {"primary": {"medium": {"url": "https://m.media-amazon.com/images/I/test2._SL160_.jpg"}}},
+        "itemInfo": {"title": {"displayValue": "Notebook Dell Inspiron 15 i7-1355U 16GB 512GB SSD"}},
+        "offersV2": {"listings": [
+          {"condition": {"value": "Used"}, "isBuyBoxWinner": false, "merchantInfo": {"name": "Loja Parceira"},
+           "price": {"money": {"amount": 3100.0, "currency": "BRL"}}},
+          {"condition": {"value": "New"}, "isBuyBoxWinner": true, "merchantInfo": {"name": "Loja Parceira"},
+           "price": {"money": {"amount": 3899.0, "currency": "BRL"}}}
+        ]}
+      },
+      {
+        "asin": "B0TEST0003",
+        "detailPageURL": "https://www.amazon.com.br/dp/B0TEST0003",
+        "itemInfo": {"title": {"displayValue": "Capa Para Notebook 15.6 Polegadas"}},
+        "offersV2": {"listings": []}
+      }
+    ]
+  }
+}

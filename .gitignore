@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+backend/data/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Ambiente
+.env
+*.log
+.server.log
+.search.json
+.sse.txt
+.fs.json
+.all.json

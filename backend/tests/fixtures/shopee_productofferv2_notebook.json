@@ -1,0 +1,19 @@
+{
+  "_comment": "Fixture no formato da consulta productOfferV2 da API de Afiliados da Shopee (a API real exige App ID/Secret aprovados).",
+  "data": {
+    "productOfferV2": {
+      "nodes": [
+        {"itemId": 22001, "productName": "Notebook Acer Aspire Go 15 Intel Core i7-13620H 32GB RAM 512GB SSD 15.6 Full HD", "priceMin": "4699.00", "priceMax": "4699.00",
+         "priceDiscountRate": 25, "imageUrl": "https://down-br.img.susercontent.com/file/test1", "shopName": "Acer Store Oficial", "shopId": 501, "shopType": [1],
+         "ratingStar": "4.8", "sales": 120, "productLink": "https://shopee.com.br/product/501/22001", "offerLink": "https://s.shopee.com.br/afiliado1"},
+        {"itemId": 22002, "productName": "Notebook Lenovo i7 13ª Geração 32gb Ssd 1tb", "priceMin": "5150.50", "priceMax": "5300.00",
+         "priceDiscountRate": 0, "imageUrl": "https://down-br.img.susercontent.com/file/test2", "shopName": "TechMais", "shopId": 502, "shopType": [2],
+         "ratingStar": "4.6", "sales": 15, "productLink": "https://shopee.com.br/product/502/22002", "offerLink": "https://s.shopee.com.br/afiliado2"},
+        {"itemId": 22003, "productName": "Carregador Fonte Notebook Lenovo 65w Usb-c", "priceMin": "79.90", "priceMax": "79.90",
+         "priceDiscountRate": 10, "imageUrl": null, "shopName": "Peças BR", "shopId": 503, "shopType": [],
+         "ratingStar": "4.9", "sales": 900, "productLink": "https://shopee.com.br/product/503/22003", "offerLink": "https://s.shopee.com.br/afiliado3"}
+      ],
+      "pageInfo": {"page": 1, "limit": 50, "hasNextPage": false}
+    }
+  }
+}

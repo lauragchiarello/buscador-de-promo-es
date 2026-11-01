@@ -1,0 +1,51 @@
+# Sobe tudo com: docker compose up
+#   frontend -> http://localhost:5173
+#   backend  -> http://localhost:8010/docs
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: promo
+      POSTGRES_PASSWORD: promo
+      POSTGRES_DB: promo
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U promo -d promo"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: ./backend
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # Usa a DATABASE_URL do .env (ex.: Supabase); sem ela, cai no Postgres local abaixo.
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://promo:promo@db:5432/promo}
+      CORS_ORIGINS: http://localhost:5173
+    ports:
+      - "8010:8010"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm install --no-fund --no-audit && npm run dev"
+    environment:
+      VITE_API_TARGET: http://backend:8010
+      VITE_POLLING: "1"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  frontend_node_modules:
