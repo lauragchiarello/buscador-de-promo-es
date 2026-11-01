@@ -62,7 +62,8 @@ def parse_query(raw: str, category: str | None = None) -> tuple[Specs, SearchQue
 _COLORS = re.compile(
     r"\b(preto|preta|branco|branca|azul|verde|rosa|roxo|roxa|lilas|cinza|prata|dourado|dourada|grafite|"
     r"amarelo|vermelho|laranja|bege|titanio|natural|meia noite|estelar|black|white|blue|green|gray|grey|"
-    r"silver|gold|pink|purple|navy|marinho|claro|clara|escuro|escura|cor)\b"
+    r"silver|gold|pink|purple|navy|marinho|claro|clara|escuro|escura|violeta|lavanda|menta|coral|creme|areia|"
+    r"oliva|turquesa|bronze|champanhe|cobre|ametista|esmeralda|safira|onix|cor)\b"
 )
 
 
