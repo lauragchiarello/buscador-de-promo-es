@@ -193,3 +193,29 @@ def test_product_type_filter_overrides_query():
     # tipo inválido é ignorado
     s2, q2 = parse_query("samsung", "geladeira")
     assert s2.category is None and q2.raw == "samsung"
+
+
+def test_iphone_new_names_and_missing_model():
+    assert extract_specs("iPhone Apple 16e 128GB Preto").phone_model == "iphone 16e"
+    assert extract_specs("Apple iPhone Air 256GB Dourado").phone_model == "iphone air"
+    q = extract_specs("iphone 15", is_query=True)
+    assert not match(q, "iPhone Apple 16e 128GB Preto").accepted
+    r = match(q, "Smartphone Apple 128GB Preto")  # sem modelo no título
+    assert not r.accepted and "modelo não identificado" in r.rejected_because
+
+
+def test_color_variants_are_collapsed():
+    from app.schemas import Offer
+    from app.services.orchestrator import collapse_color_variants
+
+    def mk(i, title, price):
+        return Offer(store="fastshop", store_name="Fast Shop", external_id=str(i), title=title, url="u", price_cash=price)
+
+    out = collapse_color_variants([
+        mk(1, "Celular Samsung Galaxy A07 128GB Preto", 1010.88),
+        mk(2, "Celular Samsung Galaxy A07 128GB Verde Claro", 1010.88),
+        mk(3, "Celular Samsung Galaxy A07 128GB Lilás", 1010.88),
+        mk(4, "Celular Samsung Galaxy A07 128GB Preto", 999.0),  # preço diferente: fica separado
+    ])
+    assert [o.external_id for o in out] == ["1", "4"]
+    assert "3 opções" in out[0].match_reasons[-1]

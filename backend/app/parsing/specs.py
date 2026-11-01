@@ -349,7 +349,7 @@ def _extract_screen(t: str) -> float | None:
 
 # Modelos de celular: "iphone 15 pro max", "galaxy s24 ultra", "galaxy a55", "moto g85", "redmi note 14 pro"
 _PHONE_MODELS = [
-    re.compile(r"\biphone\s(\d{1,2}e?)(?:\s(pro max|pro|plus|mini))?\b"),
+    re.compile(r"\biphone\s(?:apple\s)?(\d{1,2}e?|air|se)(?:\s(pro max|pro|plus|mini))?\b"),
     re.compile(r"\bgalaxy\s(z fold\s?\d|z flip\s?\d|[sam]\d{1,3})(?:\s?(ultra|plus|fe|\+))?\b"),
     re.compile(r"\bmoto(?:rola)?\s([ge]\d{1,3})(?:\s(power|play|stylus))?\b"),
     re.compile(r"\bmotorola\s(edge\s\d{1,2})(?:\s(pro|neo|fusion|ultra))?\b"),

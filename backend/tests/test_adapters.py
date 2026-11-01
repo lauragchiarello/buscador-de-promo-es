@@ -331,3 +331,11 @@ def test_catalog_store_without_category_returns_nothing():
     assert TerabyteAdapter(Settings()).paths_for(q) == []
     q2 = SearchQuery(raw="rtx 4060", specs={"gpu": "rtx 4060"}, store_terms=["rtx 4060"])
     assert "/hardware/placas-de-video/nvidia-geforce" in TerabyteAdapter(Settings()).paths_for(q2)
+
+
+def test_kabum_category_page_with_string_data():
+    # A busca às vezes redireciona para uma página de categoria, que manda os dados como texto JSON
+    items = parse_kabum_html(fixture_text("kabum_categoria_celular_samsung.html"))
+    assert len(items) == 12
+    offers = [o for o in map(kabum_item_to_offer, items) if o]
+    assert offers and all("Samsung" in o.title for o in offers)

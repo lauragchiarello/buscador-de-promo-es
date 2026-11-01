@@ -33,6 +33,11 @@ def parse_kabum_html(html: str) -> list[dict]:
         raise StoreError("Formato da página do KaBuM! mudou", detail="__NEXT_DATA__ não encontrado")
     data = json.loads(m.group(1))
     page = data.get("props", {}).get("pageProps", {}).get("data", {})
+    # Páginas de categoria (a busca às vezes redireciona para elas) mandam os dados como texto JSON.
+    if isinstance(page, str):
+        page = json.loads(page)
+    if not isinstance(page, dict):
+        return []
     catalog = page.get("catalogServer")
     if isinstance(catalog, str):  # versões antigas mandavam como string JSON
         catalog = json.loads(catalog)

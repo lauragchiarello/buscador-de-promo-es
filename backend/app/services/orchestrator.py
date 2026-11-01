@@ -12,6 +12,7 @@ as outras continuam normalmente.
 from __future__ import annotations
 
 import asyncio
+import re
 import logging
 import time
 from collections.abc import AsyncIterator
@@ -24,6 +25,7 @@ from ..config import Settings
 from ..db import session_scope
 from ..models import Search
 from ..parsing.matcher import match
+from ..parsing.normalize import normalize
 from ..parsing.specs import Specs, extract_specs
 from ..schemas import Offer, SearchQuery, build_store_terms
 from . import cache, history
@@ -55,6 +57,30 @@ def parse_query(raw: str, category: str | None = None) -> tuple[Specs, SearchQue
         specs.category = category
         key = f"{raw} [{category}]"  # cache/fila separados por tipo
     return specs, SearchQuery(raw=key, specs=specs.to_dict(), store_terms=build_store_terms(raw, specs))
+
+
+_COLORS = re.compile(
+    r"\b(preto|preta|branco|branca|azul|verde|rosa|roxo|roxa|lilas|cinza|prata|dourado|dourada|grafite|"
+    r"amarelo|vermelho|laranja|bege|titanio|natural|meia noite|estelar|black|white|blue|green|gray|grey|"
+    r"silver|gold|pink|purple|navy|marinho|claro|clara|escuro|escura|cor)\b"
+)
+
+
+def collapse_color_variants(offers: list[Offer]) -> list[Offer]:
+    """Junta o mesmo produto, na mesma loja e pelo mesmo preço, que só muda de cor."""
+    groups: dict[tuple, Offer] = {}
+    counts: dict[tuple, int] = {}
+    for o in offers:
+        base = _COLORS.sub(" ", normalize(o.title))
+        key = (o.store, o.best_price, " ".join(base.split()))
+        if key in groups:
+            counts[key] += 1
+            continue
+        groups[key], counts[key] = o, 1
+    for key, o in groups.items():
+        if counts[key] > 1:
+            o.match_reasons = [*o.match_reasons, f"Também em outras cores ({counts[key]} opções)"]
+    return list(groups.values())
 
 
 def evaluate_offers(specs: Specs, offers: list[Offer]) -> tuple[list[Offer], list[dict]]:
@@ -148,7 +174,7 @@ class SearchOrchestrator:
                     cache.set_cached, adapter.slug, query.raw,
                     [_offer_payload(o) for o in raw_offers], self.settings.cache_ttl_minutes,
                 )
-            filtered = apply_filters(accepted, f)
+            filtered = collapse_color_variants(apply_filters(accepted, f))
             await asyncio.to_thread(attach_history, filtered)
             filtered.sort(key=lambda o: (o.best_price is None, o.best_price or 0))
             elapsed = int((time.perf_counter() - started) * 1000)

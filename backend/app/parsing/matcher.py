@@ -131,6 +131,9 @@ def match(query: Specs, title: str, offer_specs: Specs | None = None) -> MatchRe
             # Títulos sempre trazem a marca: se ela não aparece, não é o produto pedido.
             if f == "brand":
                 return _reject(offer, f"não é da marca {_fmt(f, query)}")
+            # Título de celular sempre traz o modelo; sem ele, não dá para dizer que é o pedido.
+            if f == "phone_model":
+                return _reject(offer, f"modelo não identificado (pedido {want.title()})")
             # Categoria ausente é comum em títulos curtos; os outros campos geram aviso.
             got += WEIGHTS[f] * 0.5
             if f != "category":
