@@ -154,7 +154,8 @@ class SearchOrchestrator:
             return {**base, "status": "unavailable", "message": f"{adapter.name} demorou demais para responder", "offers": []}
         except StoreError as exc:
             log.warning("%s falhou (%s): %s", adapter.name, exc.status, exc.detail)
-            return {**base, "status": exc.status, "message": str(exc), "offers": []}
+            # "detail" ajuda a diagnosticar (ex.: corpo do 403); nunca contém chaves.
+            return {**base, "status": exc.status, "message": str(exc), "detail": exc.detail[:300], "offers": []}
         except Exception as exc:  # noqa: BLE001 - uma loja nunca derruba a busca
             log.exception("%s: erro inesperado", adapter.name)
             return {**base, "status": "unavailable", "message": f"Erro inesperado: {type(exc).__name__}", "offers": []}
