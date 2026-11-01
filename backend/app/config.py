@@ -46,6 +46,11 @@ class Settings(BaseSettings):
     shopee_app_id: str = ""
     shopee_app_secret: str = ""
 
+    # Lomadee — rede de afiliados (https://docs.lomadee.com.br)
+    lomadee_api_key: str = ""
+    lomadee_base_url: str = "https://api.lomadee.com.br"
+    lomadee_price_in_cents: bool = True
+
     @property
     def cors_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

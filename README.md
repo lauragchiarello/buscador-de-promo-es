@@ -104,6 +104,7 @@ React (Vite) ──EventSource──▶ FastAPI /api/search/stream
 | **Terabyte** | Catálogo da 1ª página de cada categoria (`/notebooks`, `/hardware/...`), guardado por 6 h | A Cloudflare costuma pedir verificação anti-robô; aí a loja aparece como indisponível e usamos o catálogo salvo, se houver. A paginação é sempre desafiada, então a cobertura é parcial (cerca de 20 a 30 produtos por categoria). |
 | **Amazon** | Creators API oficial (`AMAZON_CLIENT_ID`, `AMAZON_CLIENT_SECRET`, `AMAZON_PARTNER_TAG`) | Exige conta no Associados com vendas recentes. Até 10 itens por página (buscamos 2 páginas por termo). A API não informa parcelamento nem frete. Fixture no formato da documentação. |
 | **Shopee** | API de Afiliados GraphQL (`SHOPEE_APP_ID`, `SHOPEE_APP_SECRET`) | Exige aprovação no programa de afiliados. O preço "de" é estimado pelo % de desconto. Os links são de afiliado. Fixture no formato da documentação. |
+| **Lomadee** (rede de afiliados) | API de afiliados (`LOMADEE_API_KEY`): `/affiliate/products?search=` traz produtos de todas as lojas parceiras | Só aparecem as lojas da rede às quais sua conta tem acesso. A documentação diz que os preços vêm em centavos, mas o exemplo oficial contradiz; confira com dados reais (`LOMADEE_PRICE_IN_CENTS`). Funciona no Render. |
 | Pichau | — (não implementada) | Responde 403 com desafio da Cloudflare até na primeira página de categoria. Não contornamos. Alternativa: feed de produtos de um programa de afiliados. |
 
 Respeitar o robots.txt não significa que a loja autoriza scraping nos termos de uso.
